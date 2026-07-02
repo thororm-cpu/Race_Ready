@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Race Ready V6</title>
+
+<style>
+body { margin:0; font-family:Arial; background:#0f0f0f; color:white; }
+
+header { padding:12px; font-size:20px; font-weight:bold; background:#111; }
+
+.tabs { display:flex; background:#1c1c1c; position:sticky; top:0; }
+.tab { flex:1; padding:12px; text-align:center; cursor:pointer; font-size:12px; }
+.tab.active { background:#00c853; color:black; font-weight:bold; }
+
+.content { padding:14px; }
+
+.card { background:#1c1c1c; padding:12px; border-radius:10px; margin-bottom:10px; }
+
+input {
+  width:100%;
+  padding:10px;
+  margin:6px 0 10px;
+  border-radius:8px;
+  border:none;
+}
+
+button {
+  width:100%;
+  padding:12px;
+  background:#00c853;
+  border:none;
+  font-weight:bold;
+  border-radius:10px;
+}
+
+.item {
+  display:flex;
+  justify-content:space-between;
+  margin:6px 0;
+  font-size:14px;
+}
+
+pre { white-space:pre-wrap; font-size:13px; }
+
+.warning { color:#ff5252; }
+.ok { color:#00c853; }
+</style>
+</head>
+
+<body>
+
+<header>🏃 Race Ready V6</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('home',event)">🏠</div>
+  <div class="tab" onclick="show('check',event)">🎒</div>
+  <div class="tab" onclick="show('nutrition',event)">🥤</div>
+  <div class="tab" onclick="show('alerts',event)">🚨</div>
+  <div class="tab" onclick="show('start',event)">🕒</div>
+</div>
+
+<div class="content">
+
+<!-- HOME -->
+<div id="home" class="section">
+
+<div class="card">
+<label>Durée (h)</label>
+<input id="d" type="number" value="2.5">
+
+<label>Température (°C)</label>
+<input id="t" type="number" value="15">
+
+<button onclick="generate()">Préparer la course</button>
+</div>
+
+<div class="card">
+<pre id="summary">Prêt à générer</pre>
+</div>
+
+</div>
+
+<!-- CHECKLIST -->
+<div id="check" class="section" style="display:none">
+<div class="card" id="checklist"></div>
+
+<div class="card">
+<h3>⚠ Indispensables couple</h3>
+<div class="item"><span>Capteur cardio Vincent</span><input type="checkbox"></div>
+<div class="item"><span>Capteur cardio Marianne</span><input type="checkbox"></div>
+<div class="item"><span>Porte-dossard (si course)</span><input type="checkbox"></div>
+<div class="item"><span>Montres chargées</span><input type="checkbox"></div>
+<div class="item"><span>Gels comptés</span><input type="checkbox"></div>
+</div>
+</div>
+
+<!-- NUTRITION -->
+<div id="nutrition" class="section" style="display:none">
+<pre id="nut"></pre>
+
+<div class="card">
+<h3>📦 INVENTAIRE NUTRITION</h3>
+<div class="item"><span>Gels TA</span><input id="stock" type="number" value="10"></div>
+<div class="item"><span>Gommes TA</span><input type="number" value="8"></div>
+<div class="item"><span>Hydro poudre</span><input type="checkbox"></div>
+</div>
+</div>
+
+<!-- ALERTS -->
+<div id="alerts" class="section" style="display:none">
+<pre id="alertbox"></pre>
+</div>
+
+<!-- START -->
+<div id="start" class="section" style="display:none">
+
+<div class="card">
+<h3>🕒 TIMELINE DÉPART</h3>
+<p>3h avant : repas principal</p>
+<p>1h avant : hydratation légère</p>
+<p>30 min : check sac</p>
+<p>10 min : gels + départ</p>
+</div>
+
+<div class="card">
+<h3>✔ CHECK FINAL</h3>
+<div class="item"><span>Montres</span><input type="checkbox"></div>
+<div class="item"><span>Capteurs cardio</span><input type="checkbox"></div>
+<div class="item"><span>Flasques</span><input type="checkbox"></div>
+<div class="item"><span>Gels</span><input type="checkbox"></div>
+<div class="item"><span>Porte-dossard</span><input type="checkbox"></div>
+<div class="item"><span>Téléphone</span><input type="checkbox"></div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function show(id,e){
+document.querySelectorAll(".section").forEach(s=>s.style.display="none");
+document.getElementById(id).style.display="block";
+
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+e.target.classList.add("active");
+}
+
+let vinG=0, marG=0;
+
+function generate(){
+
+let d=parseFloat(document.getElementById("d").value);
+let t=parseFloat(document.getElementById("t").value);
+
+let vinH=d*500*(t>20?1.2:1);
+let marH=d*375*(t>20?1.15:1);
+
+let vinC=d*40;
+let marC=d*32;
+
+vinG=Math.ceil(vinC/25);
+marG=Math.ceil(marC/25);
+
+// SUMMARY
+document.getElementById("summary").innerText=
+`VINCENT
+Hydratation: ${vinH.toFixed(0)} ml
+Glucides: ${vinC.toFixed(0)} g
+Gels: ${vinG}
+
+MARIANNE
+Hydratation: ${marH.toFixed(0)} ml
+Glucides: ${marC.toFixed(0)} g
+Gels: ${marG}`;
+
+// CHECKLIST
+document.getElementById("checklist").innerHTML=
+`<h3>🧍 Vincent</h3>
+<div class="item"><span>Sous-vêtement course</span><input type="checkbox"></div>
+<div class="item"><span>Short</span><input type="checkbox"></div>
+<div class="item"><span>T-shirt</span><input type="checkbox"></div>
+<div class="item"><span>Chaussettes</span><input type="checkbox"></div>
+<div class="item"><span>Montre</span><input type="checkbox"></div>
+<div class="item"><span>Gilet</span><input type="checkbox"></div>
+<div class="item"><span>Gels (${vinG})</span><input type="checkbox"></div>
+<div class="item"><span>Téléphone</span><input type="checkbox"></div>
+
+<h3>🧍 Marianne</h3>
+<div class="item"><span>Brassière</span><input type="checkbox"></div>
+<div class="item"><span>Short</span><input type="checkbox"></div>
+<div class="item"><span>T-shirt</span><input type="checkbox"></div>
+<div class="item"><span>Montre</span><input type="checkbox"></div>
+<div class="item"><span>Gilet</span><input type="checkbox"></div>
+<div class="item"><span>Gels (${marG})</span><input type="checkbox"></div>`;
+
+// NUTRITION
+document.getElementById("nut").innerText=
+`VINCENT
+Hydratation: ${vinH.toFixed(0)} ml
+Glucides: ${vinC.toFixed(0)} g
+Gels: ${vinG}
+
+MARIANNE
+Hydratation: ${marH.toFixed(0)} ml
+Glucides: ${marC.toFixed(0)} g
+Gels: ${marG}`;
+
+// ALERTS
+let alerts=[];
+
+if(t>20) alerts.push("Chaleur → + hydratation");
+if(d>2) alerts.push("Course longue → gilet obligatoire");
+
+if(vinG>parseInt(document.getElementById("stock").value))
+alerts.push("Vincent : gels insuffisants");
+
+if(alerts.length===0) alerts.push("✔ Aucun problème détecté");
+
+document.getElementById("alertbox").innerText=
+alerts.map(a=>"• "+a).join("\n");
+
+}
+
+</script>
+
+</body>
+</html>
