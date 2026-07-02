@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Race Ready V5</title>
+
+<style>
+body { margin:0; font-family:Arial; background:#0f0f0f; color:white; }
+
+header { padding:12px; font-size:20px; background:#111; font-weight:bold; }
+
+.tabs { display:flex; background:#1c1c1c; }
+.tab { flex:1; padding:12px; text-align:center; cursor:pointer; font-size:13px; }
+.tab.active { background:#00c853; color:black; font-weight:bold; }
+
+.content { padding:14px; }
+
+.card { background:#1c1c1c; padding:12px; border-radius:10px; margin-bottom:10px; }
+
+button {
+  width:100%;
+  padding:12px;
+  background:#00c853;
+  border:none;
+  font-weight:bold;
+  border-radius:10px;
+}
+
+input { width:100%; padding:10px; margin:6px 0 10px; border-radius:8px; border:none; }
+
+.item { display:flex; justify-content:space-between; margin:6px 0; }
+
+.warning { color:#ff5252; font-weight:bold; }
+
+.ok { color:#00c853; }
+
+</style>
+</head>
+
+<body>
+
+<header>🏃 Race Ready V5</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('check')">🎒 Checklist</div>
+  <div class="tab" onclick="show('nutrition')">🥤 Nutrition</div>
+  <div class="tab" onclick="show('vest')">🎒 Gilet</div>
+  <div class="tab" onclick="show('alerts')">🚨 Alertes</div>
+</div>
+
+<div class="content">
+
+<div class="card">
+<label>Durée (h)</label>
+<input id="duration" type="number" value="2.5">
+
+<label>Température</label>
+<input id="temp" type="number" value="15">
+
+<button onclick="generate()">Analyser course</button>
+</div>
+
+<!-- CHECKLIST -->
+<div id="check" class="section">
+<div id="checklist"></div>
+</div>
+
+<!-- NUTRITION -->
+<div id="nutrition" class="section" style="display:none">
+<pre id="nut"></pre>
+</div>
+
+<!-- VEST -->
+<div id="vest" class="section" style="display:none">
+<div id="vestbox"></div>
+</div>
+
+<!-- ALERTS -->
+<div id="alerts" class="section" style="display:none">
+<div id="alertbox"></div>
+</div>
+
+</div>
+
+<script>
+
+function show(tab){
+document.querySelectorAll(".section").forEach(s=>s.style.display="none");
+document.getElementById(tab).style.display="block";
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+event.target.classList.add("active");
+}
+
+function cb(label){
+return `<div class="item"><span>${label}</span><input type="checkbox"></div>`;
+}
+
+function generate(){
+
+let d = parseFloat(document.getElementById("duration").value);
+let t = parseFloat(document.getElementById("temp").value);
+
+// HYDRATION / CARBS
+let vinH = d*500*(t>20?1.2:1);
+let marH = d*375*(t>20?1.15:1);
+
+let vinC = d*40;
+let marC = d*32;
+
+let vinG = Math.ceil(vinC/25);
+let marG = Math.ceil(marC/25);
+
+// CHECKLIST
+document.getElementById("checklist").innerHTML =
+<h3>⚠️ INDISPENSABLES COUPLE</h3>
+
+<div class="item"><span>Capteur cardio Vincent</span><input type="checkbox"></div>
+<div class="item"><span>Capteur cardio Marianne</span><input type="checkbox"></div>
+
+<div class="item"><span>Porte-dossard Vincent (si course)</span><input type="checkbox"></div>
+<div class="item"><span>Porte-dossard Marianne (si course)</span><input type="checkbox"></div>
+
+<div class="item"><span>Gels TA (stock complet vérifié)</span><input type="checkbox"></div>
+<div class="item"><span>Gilet hydratation Vincent</span><input type="checkbox"></div>
+<div class="item"><span>Gilet hydratation Marianne</span><input type="checkbox"></div>
+
+<div class="item"><span>Téléphones chargés (2)</span><input type="checkbox"></div>
+<div class="item"><span>Montres chargées (2)</span><input type="checkbox"></div>
+"<h3>🧍 Vincent</h3>" +
+cb("Sous-vêtement course") +
+cb("Short") +
+cb("T-shirt") +
+cb("Chaussettes") +
+cb("Montre") +
+cb("Capteur cardio") +
+cb("Gilet hydratation") +
+cb(`Gels (${vinG})`) +
+cb("Téléphone") +
+cb("Casquette") +
+
+"<h3>🧍 Marianne</h3>" +
+cb("Brassière") +
+cb("Short") +
+cb("T-shirt") +
+cb("Chaussettes") +
+cb("Montre") +
+cb("Gilet hydratation") +
+cb(`Gels (${marG})`) +
+cb("Téléphone") +
+cb("Casquette");
+
+// NUTRITION
+document.getElementById("nut").innerText =
+`VINCENT
+Hydratation: ${vinH.toFixed(0)} ml
+Glucides: ${vinC.toFixed(0)} g
+Gels: ${vinG}
+
+MARIANNE
+Hydratation: ${marH.toFixed(0)} ml
+Glucides: ${marC.toFixed(0)} g
+Gels: ${marG}`;
+
+// VEST MODE
+document.getElementById("vestbox").innerHTML =
+`<h3>Vincent (gilet)</h3>
+${cb("Avant G: Gel")}
+${cb("Avant D: Gel")}
+${cb("Avant G: Gomme")}
+${cb("Avant D: Gel")}
+${cb("Arrière: Veste")}
+${cb("Poitrine: Téléphone")}`;
+
+// ALERTS
+let alerts = "";
+
+if(t>20) alerts += "⚠ Chaleur → augmenter hydratation\n";
+if(d>2) alerts += "⚠ Course longue → gilet obligatoire\n";
+if(vinG<3) alerts += "⚠ Vincent sous-dosé en glucides\n";
+if(marG<2) alerts += "⚠ Marianne sous-dosée en glucides\n";
+
+if(alerts==="") alerts="✔ Aucun problème détecté";
+
+document.getElementById("alertbox").innerHTML =
+"<pre class='warning'>" + alerts + "</pre>";
+
+}
+
+</script>
+
+</body>
+</html>
